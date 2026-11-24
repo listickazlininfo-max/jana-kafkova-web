@@ -1,7 +1,7 @@
 import { getStore } from '@netlify/blobs';
 import crypto from 'node:crypto';
 const store=()=>getStore({name:'jana-bookings',consistency:'strong'});
-const password=()=>process.env.ADMIN_PASSWORD||'kafkova';
+const password=()=>process.env.ADMIN_PASSWORD||'';
 const secret=()=>process.env.ADMIN_SESSION_SECRET||password();
 const sign=value=>crypto.createHmac('sha256',secret()).update(value).digest('hex');
 const cookieValue=()=>{const value=String(Date.now()+1000*60*60*24*7);return value+'.'+sign(value);};
@@ -15,3 +15,4 @@ if(request.method==='GET')return json({blocked:(await blob.get('blocked',{type:'
 if(request.method!=='POST')return json({error:'Metoda neni podporovana.'},{status:405});
 const data=await request.json();if(data.action==='block'||data.action==='unblock'){const blocked=(await blob.get('blocked',{type:'json'}))||[];const next=data.action==='block'?[...new Set([...blocked,data.date])]:blocked.filter(date=>date!==data.date);await blob.setJSON('blocked',next);return json({blocked:next});}return json({error:'Neznama akce.'},{status:400});
 };
+
